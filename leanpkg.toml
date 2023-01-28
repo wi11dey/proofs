@@ -1,0 +1,8 @@
+[package]
+name = "har-ifvm-23-wi11dey"
+version = "0.1"
+lean_version = "leanprover-community/lean:3.50.3"
+path = "src"
+
+[dependencies]
+mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "42dcf354c56715e8b9e3fa8df385c51606ba95e8"}
