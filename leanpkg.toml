@@ -1,7 +1,7 @@
 [package]
 name = "har-ifvm-23-wi11dey"
 version = "0.1"
-lean_version = "leanprover-community/lean:3.50.3"
+lean_version = "leanprover-community/lean:3.41.0"
 path = "src"
 
 [dependencies]

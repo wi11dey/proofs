@@ -28,7 +28,7 @@ the Euclidean plane, ℝ × ℝ, with the usual definition of inner product.
 variables x y z : euclidean_space ℝ (fin 2)
 
 #check ⟪x, y⟫    -- the inner product
-#check ‖x‖       -- the norm
+#check ∥x∥       -- the norm
 #check x + y
 #check 3 • x
 
@@ -44,7 +44,7 @@ example : ⟪x + y, z⟫ = ⟪x, z⟫ + ⟪y, z⟫ := inner_add_left
 example : ⟪x, y - z⟫ = ⟪x, y⟫ - ⟪x, z⟫ := inner_sub_right
 example : ⟪x - y, z⟫ = ⟪x, z⟫ - ⟪y, z⟫ := inner_sub_left
 
-example :  ⟪x, x⟫ = ‖x‖^2 := real_inner_self_eq_norm_sq x
+example :  ⟪x, x⟫ = ∥x∥^2 := real_inner_self_eq_norm_sq x
 
 /-
 The following identity is known as the *parallelogram law*. It says that the sum of the squares
@@ -57,9 +57,20 @@ Formalize it using only the four identities above as well as the `ring` tactic.
 -/
 
 example :
-  ‖x + y‖^2 + ‖x - y‖^2  = 2 * (‖x‖^2 + ‖y‖^2) :=
+  ∥x + y∥^2 + ∥x - y∥^2  = 2 * (∥x∥^2 + ∥y∥^2) :=
 begin
-  sorry
+  -- Expand squares:
+  rw [←real_inner_self_eq_norm_sq, ←real_inner_self_eq_norm_sq],
+  -- Distribute:
+  rw [inner_add_right, inner_add_left, inner_add_left],
+  -- Collect squares:
+  rw [real_inner_self_eq_norm_sq, real_inner_self_eq_norm_sq],
+  -- Distribute again:
+  rw [inner_sub_right, inner_sub_left, inner_sub_left],
+  -- Collect squares:
+  rw [real_inner_self_eq_norm_sq, real_inner_self_eq_norm_sq],
+  -- Cancel:
+  ring,
 end
 
 /-
@@ -121,11 +132,16 @@ begin
   calc
     x + x = (x + x)^2 :
       begin
-        sorry
+        rw idem
       end
     ... = x + x + (x + x) :
       begin
-        sorry
+        -- Expand square:
+        rw pow_two,
+        -- Distribute:
+        rw [mul_add, add_mul],
+        -- Idempotent:
+        rw mul_idem idem,
       end,
   have h2 : (x + x) + (x + x) - (x + x) = (x + x) - (x + x),
     by rw ←h1,
@@ -143,7 +159,10 @@ Prove `neg_eq_self` using the calculation `-x = 0 - x = x + x - x = x`. You can 
 -/
 
 theorem neg_eq_self (x : R) : -x = x :=
-sorry
+calc
+  -x  = 0 - x     : by rw ←zero_sub
+  ... = x + x - x : by rw ←add_self idem
+  ... = x         : by rw add_sub_cancel
 
 /-
 This is a corollary.
@@ -157,7 +176,16 @@ Prove this, using the calculation `x = x + y - y = 0 - y = -y = y`.
 -/
 theorem eq_of_add_eq_zero {x y : R} (h : x + y = 0) :
   x = y :=
-sorry
+calc
+  x = x + y - y :
+    begin
+      nth_rewrite 0 ←add_zero x,
+      rw ←sub_self y,
+      rw add_sub_assoc
+    end
+  ... = 0 - y : by rw h
+  ... = -y    : by rw ←zero_sub
+  ... = y     : by rw neg_eq_self idem
 
 /- Finally, prove `mul_comm` using the following argument from Wikipedia:
 
@@ -175,11 +203,20 @@ begin
   calc
     0 + (x + y) = (x + y)^2 :
       begin
-        sorry
+        rw zero_add,
+        rw pow_two,
+        rw mul_idem idem,
       end
     ... = x * y + y * x + (x + y) :
       begin
-        sorry
+        -- Expand squares:
+        rw pow_two,
+        -- Distribute:
+        rw [add_mul, mul_add, mul_add],
+        -- Idempotent:
+        rw [mul_idem idem, mul_idem idem],
+        rw ←add_assoc,
+        abel
       end,
   have h2 : 0 = x * y + y * x,
     exact add_right_cancel h1,
@@ -262,6 +299,18 @@ example
     (hw : abs w ≤ 3) :
   abs (x - y + z) + w^2 ≤ 28 :=
 begin
+  have h1 : w^2 ≤ 9,
+    begin
+      rw ←sq_abs,
+      rw pow_two,
+      transitivity ((3 : ℝ) * 3),
+      swap, { by norm_num },
+      apply mul_le_mul,
+      exact hw,
+      exact hw,
+      apply abs_nonneg,
+      norm_num
+    end,
   sorry
 end
 
