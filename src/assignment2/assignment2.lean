@@ -303,15 +303,23 @@ begin
     begin
       rw ←sq_abs,
       rw pow_two,
-      transitivity ((3 : ℝ) * 3),
-      swap, { by norm_num },
+      apply le_trans,
       apply mul_le_mul,
       exact hw,
       exact hw,
       apply abs_nonneg,
+      norm_num,
       norm_num
     end,
-  sorry
+  transitivity ((10 : ℝ) + 5 + 4 + 9),
+  apply add_le_add _ h1,
+  swap, { by norm_num },
+  apply le_trans,
+  apply abs_add,
+  apply add_le_add _ hz,
+  apply le_trans,
+  apply abs_sub,
+  apply add_le_add hx hy
 end
 
 end absolute_value_exercise
