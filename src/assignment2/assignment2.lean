@@ -304,9 +304,7 @@ begin
       rw ←sq_abs,
       rw pow_two,
       apply le_trans,
-      apply mul_le_mul,
-      exact hw,
-      exact hw,
+      apply mul_le_mul hw hw,
       apply abs_nonneg,
       norm_num,
       norm_num
