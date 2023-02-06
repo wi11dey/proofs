@@ -279,7 +279,18 @@ end
 example (f : ℝ → ℝ) (r : ℝ) (hr : 0 < r) (hf : to_infinity f) :
   to_infinity (λ x, r * f x) :=
 begin
-  sorry
+  unfold to_infinity,
+  intro b,
+  cases hf (b / r) with x₀ h2,
+  use x₀,
+  intros x hx₀_le_x,
+  specialize h2 x hx₀_le_x,
+  have h3 : b < f x * r,
+  {
+    rw ←div_lt_iff hr,
+    apply h2
+  },
+  linarith
 end
 
 -- hint: you can use `le_max_left` and `le_max_right`
