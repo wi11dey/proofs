@@ -264,9 +264,15 @@ def to_infinity (f : ℝ → ℝ) := ∀ b, ∃ x₀, ∀ x, x₀ ≤ x → b < 
 
 -- hint: you can use `linarith` at the end
 example (f : ℝ → ℝ) (r : ℝ) (hf : to_infinity f) :
-  to_infinity (λ x, f x  + r) :=
+  to_infinity (λ x, f x + r) :=
 begin
-  sorry
+  unfold to_infinity,
+  intro b,
+  cases hf (b - r) with x₀ h2,
+  use x₀,
+  intros x hx₀_le_x,
+  specialize h2 x hx₀_le_x,
+  linarith
 end
 
 -- hint: `div_lt_iff'` is useful here
