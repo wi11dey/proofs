@@ -281,14 +281,14 @@ example (f : ℝ → ℝ) (r : ℝ) (hr : 0 < r) (hf : to_infinity f) :
 begin
   unfold to_infinity,
   intro b,
-  cases hf (b / r) with x₀ h2,
+  cases hf (b/r) with x₀ hf',
   use x₀,
   intros x hx₀_le_x,
-  specialize h2 x hx₀_le_x,
-  have h3 : b < f x * r,
+  specialize hf' x hx₀_le_x,
+  have h : b < f x * r,
   {
     rw ←div_lt_iff hr,
-    apply h2
+    apply hf'
   },
   linarith
 end
@@ -297,5 +297,28 @@ end
 example (f g : ℝ → ℝ) (hf : to_infinity f) (hg : to_infinity g) :
   to_infinity (f + g) :=
 begin
-  sorry
+  unfold to_infinity,
+  intro b,
+  dsimp,
+  cases hf (b/2) with fx₀ hf2,
+  cases hg (b/2) with gx₀ hg2,
+  use max fx₀ gx₀,
+  intros x hmax_fx₀_gx₀_le_x,
+  have hfx₀_le_x : fx₀ ≤ x,
+  {
+    apply le_trans,
+    apply le_max_left,
+    swap,
+    exact hmax_fx₀_gx₀_le_x
+  },
+  have hgx₀_le_x : gx₀ ≤ x,
+  {
+    apply le_trans,
+    apply le_max_right,
+    swap,
+    exact hmax_fx₀_gx₀_le_x
+  },
+  specialize hf2 x hfx₀_le_x,
+  specialize hg2 x hgx₀_le_x,
+  linarith
 end
