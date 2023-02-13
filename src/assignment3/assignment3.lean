@@ -1,6 +1,13 @@
 import data.real.basic
 
 /-
+Correctness 90/90
+Style: 10/10
+Good work Will!
+-/
+
+
+/-
 FIRST EXERCISE: Strict monotonicity
 
 Section 3.1 of MIL discusses the `monotone` predicate. There is also a strict
