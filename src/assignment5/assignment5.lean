@@ -143,7 +143,7 @@ begin
   set ε := f c /2 with εdef, -- define a new ε = (f c)/2
   have εpos : 0 < ε, -- ε is positive
   { --[2pts]
-    sorry, 
+    linarith,
   },
   specialize ctsf c,  -- we are inerested in continuity at c 
   specialize ctsf ε (εpos), -- use ε = (f c) / 2 in continuity at c
@@ -151,24 +151,39 @@ begin
   
   have find_s : ∃ s ∈ S , c-δ/2 < s,
   { --[10pts] -- if you get stuck, look through the #check statements above.
-    sorry, 
+    apply exists_lt_of_lt_cSup Sfull,
+    linarith
   },
   
   rcases find_s with ⟨ s, sinS, hs ⟩,-- pick a particular s ∈ S with c-δ/2 < s
   
   have slec : s ≤ c,
   { --[10pts]
-    sorry,
+    exact le_cSup bddS sinS,
   },
 
   have snearc : |s - c | < δ,
   { --[10pts]
-    sorry,
+    have : |s - c| = c - s,
+    {
+      nth_rewrite 1 ←neg_sub,
+      apply abs_of_nonpos,
+      linarith
+    },
+    rw this,
+    linarith
   },
 
   have fspos : 0 < f s,
   { --[15pts]
-    sorry, 
+    specialize hδ s snearc,
+    by_contra fsnonpos,
+    rw not_lt at fsnonpos,
+    rw ←not_le at hδ,
+    apply hδ,
+    have : f s - f c ≤ 0, { by linarith },
+    rw abs_of_nonpos this,
+    linarith,
   },
   --[5pts]
   /- Verify that `linarith` alone does not work below.
@@ -186,7 +201,7 @@ begin
      for  f s < 0.  
      (Hint: use the fact that s ∈ S.)  
   -/
-  sorry,
+  linarith [sinS.2.2],
 
 end
 
