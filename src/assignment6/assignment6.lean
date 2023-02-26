@@ -58,7 +58,6 @@ Then by `aux0`, `lfp F ⊆ t`, and by monotonicity, we have `F (lfp F) ⊆ F t �
 lemma aux1 : F (lfp F) ⊆ lfp F :=
 begin
   apply subset_sInter,
-  dsimp,
   intros t ht,
   exact subset_trans (monoF (aux0 ht)) ht
 end
@@ -118,7 +117,6 @@ include monoF
 lemma aux1 : F (lfp F) ≤ lfp F :=
 begin
   apply le_Inf,
-  dsimp,
   intros t ht,
   exact le_trans (monoF (aux0 ht)) ht,
 end
@@ -170,13 +168,42 @@ include B_def
 -- Exercise 3a. [10pts]
 theorem monotone_B : ∀ i j, i ≤ j → B i ⊆ B j :=
 begin
-  sorry
+  intros i j hi_le_j,
+  rw B_def i,
+  rw B_def j,
+  apply set.Union_mono,
+  intros g,
+  apply set.Union_subset_Union_const,
+  intros hg_lt_i,
+  exact lt_of_lt_of_le hg_lt_i hi_le_j,
 end
 
 -- Exercise 3b. [15pts]
 theorem Union_B_eq_Union_A : (⋃ i, B i) = (⋃ i, A i) :=
 begin
-  sorry
+  apply subset_antisymm,
+  {
+    -- Case (⋃ i, B i) ⊆ (⋃ i, A i)
+    intros x,
+    rw [set.mem_Union, exists_imp_distrib],
+    intros _ hx,
+    rw [B_def, set.mem_Union] at hx,
+    cases hx with _ hx,
+    rw set.mem_Union at hx,
+    cases hx with _ hx,
+    exact set.mem_Union_of_mem _ hx,
+  },
+  {
+    -- Case (⋃ i, B i) ⊇ (⋃ i, A i)
+    apply set.Union_mono',
+    intros i,
+    use i + 1,
+    rw B_def,
+    apply set.subset_Union_of_subset,
+    apply set.subset_Union_of_subset,
+    apply nat.lt_succ_self,
+    refl,
+  }
 end
 
 end set_sequences
@@ -196,7 +223,7 @@ variables (A C : ℕ → set α)
 variable (C_def : ∀ n, C n = A n \ (⋃ i < n, A i))
 
 -- This may be useful.
-#check @set.eq_empty_of_forall_not_mem
+-- #check @set.eq_empty_of_forall_not_mem
 
 /-
 Use the lemma `aux` below to show that if `x` is in some `A i`, then there
@@ -215,13 +242,51 @@ include C_def
 -- Exercise 4a. [10pts]
 theorem disjoint_C_of_lt : ∀ i j, i < j → C i ∩ C j = ∅ :=
 begin
-  sorry,
+  intros i j hi_lt_j,
+  rw set.eq_empty_iff_forall_not_mem,
+  by_contra hx,
+  push_neg at hx,
+  cases hx with x hx,
+  cases hx with hx_Ci hx_Cj,
+  rw C_def at *,
+  apply hx_Cj.right,
+  apply set.mem_Union_of_mem,
+  exact set.mem_Union_of_mem hi_lt_j hx_Ci.left,
 end
 
 -- Exercise 4b. [15pts]
 theorem Union_C_eq_Union_A : (⋃ i, C i) = (⋃ i, A i) :=
 begin
-  sorry,
+  apply subset_antisymm,
+  {
+    -- Case (⋃ i, C i) ⊆ (⋃ i, A i):
+    apply set.Union_mono,
+    intros,
+    rw C_def,
+    apply set.diff_subset,
+  },
+  {
+    -- Case (⋃ i, C i) ⊇ (⋃ i, A i):
+    intros x,
+    rw set.mem_Union,
+    intros hx_Aj,
+    have := aux hx_Aj,
+    dsimp at this,
+    -- i is the minimum ℕ such that x ∈ A i, by aux:
+    cases this with i this,
+    cases this with hx_Ai hj,
+    rw set.mem_Union,
+    use i,
+    rw C_def,
+    split, { by exact hx_Ai },
+    by_contra h,
+    rw set.mem_Union at h,
+    cases h with j h,
+    rw set.mem_Union at h,
+    cases h with hj_lt_i h,
+    apply hj j hj_lt_i,
+    exact h,
+  }
 end
 
 end set_sequences
