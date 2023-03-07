@@ -1,5 +1,11 @@
 import data.real.basic
 
+/- Good work!
+Correctness 90/90
+Style 10/10
+-/
+
+
 /-
 EXERCISE 1.
 
