@@ -194,9 +194,8 @@ instance : quasigroup ℤ :=
     begin
       simp [int.sub],
       intros a b x h,
-      have : a - x = b        := norm_num.sub_pos a x (-x) b rfl h,
-      have :    -x = b - a    := eq_sub_of_add_eq' h,
-      have :     x = -(b - a) := eq_neg_of_eq_neg (eq.symm this),
+      have : -x = b - a    := eq_sub_of_add_eq' h,
+      have :  x = -(b - a) := eq_neg_of_eq_neg (eq.symm this),
       rw neg_sub b a at this,
       assumption,
     end,
@@ -248,5 +247,4 @@ begin
 end
 
 end quasigroup
-
 
