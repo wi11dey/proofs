@@ -1,6 +1,13 @@
 import data.int.basic
 import data.nat.prime
 
+/-
+Correctness 90/90
+Style: 10/10
+Good work Will!
+-/
+
+
 /- This assignment is due by 11:59pm on Friday, March 10th 2023. -/
 
 /-
