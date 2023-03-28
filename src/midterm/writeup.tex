@@ -1,0 +1,20 @@
+\input opmac
+
+\typosize[12/16]
+
+I will formalize a proof of L'H\^opital's theorem, using only the definitions used in assignment 5. Many new definitions will be required, such as a formalization of the derivative using only definitions from assignment 5, which I am working on at the moment.
+
+\medskip 
+\noindent {\bf Theorem}: Given $f,g:{\bbchar R}\mapsto{\bbchar R}\in C^2$, $$\lim_{x\to c}{f(x)\over g(x)}=\lim_{x\to c}{f'(x)\over g'(x)}$$
+
+\noindent{\it Proof\/}: It suffices to show that \label[suffices]$$\lim_{x\to c}{f(x)\over g(x)}={f'(c)\over g'(c)},\eqmark$$ since $${f'(c)\over g'(c)}=\lim_{x\to c}{f'(x)\over g'(x)}$$ by definition of continuity. Then,
+$$\eqalignno{
+    \lim_{x\to c}{f(x)\over g(x)}&=\lim_{x\to c}{f(x)-0\over g(x)-0}\cr
+    &=\lim_{x\to c}{f(x)-f(c)\over g(x)-g(c)}\cr
+    &=\lim_{x\to c}{{f(x)-f(c)\over x-c}\over{g(x)-g(c)\over x-c}}\cr
+    &=\lim_{x\to c}{\lim_{x\to c}{f(x)-f(c)\over x-c}\over\lim_{x\to c}{g(x)-g(c)\over x-c}}\cr
+    &={f'(c)\over g'(c)},
+}$$
+proving \ref[suffices], as desired.
+
+\bye
