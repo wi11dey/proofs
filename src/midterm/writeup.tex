@@ -1,20 +1,28 @@
 \input opmac
 
-\typosize[12/16]
+\typosize[12/20]
 
-I will formalize a proof of L'H\^opital's theorem, using only the definitions used in assignment 5. Many new definitions will be required, such as a formalization of the derivative using only definitions from assignment 5, which I am working on at the moment.
+My initial project was to formalize L'H\^opital's theorem using only the definitions used in Assignment 5. However, after much debugging, I found that the definition of {\tt approaches\_at} provided in both Assignment 4 and 5 contains a bug. It defines $\lim_{x\to c}f(x)=L$ as $$\forall\epsilon>0,\exists \delta >0 : |x - c| < \delta \Longrightarrow |f(x)-L|<\epsilon.$$ This definition, however, is too strict can causes the subsequent definition of {\tt continuous} to be content free, since it does not allow $\lim_{x\to c}f(x)=L\wedge f(x)\ne L$---a fundamental property of limits. The correct definition is $$\forall\epsilon>0,\exists \delta >0 : 0<|x - c| < \delta \Longrightarrow |f(x)-L|<\epsilon,$$ which I have implemented. Debugging this fact was one of the harder parts of implementation, as well as implementing a utility lemma {\tt approaches\_at\_rw}, which allows users to rewrite the inside of limits using rewrite rules that need not apply at the limit point.
+
+L'H\^opital's theorem is used to resolve ${0\over 0}$ indeterminate limits using derivatives when the derivative of the denominator is not 0. The proof of L'H\^opital's that I formalized was the classical one presented in undergraduate calculus classes:
+
+\medskip
+\noindent {\bf Definition}: I use the limit-difference-quotient definition of the derivative $$f'(c)=\lim{x\to c}{f(x)-f(c)\over x - c}$$ in this proof.
 
 \medskip 
-\noindent {\bf Theorem}: Given $f,g:{\bbchar R}\mapsto{\bbchar R}\in C^2$, $$\lim_{x\to c}{f(x)\over g(x)}=\lim_{x\to c}{f'(x)\over g'(x)}$$
+\noindent {\bf Theorem}: Given $f,g:{\bbchar R}\mapsto{\bbchar R}\in C^2$, $f(c)=g(c)=0$, and $g'(c)\ne0$, $$\lim_{x\to c}{f(x)\over g(x)}={f'(x)\over g'(x)}$$
 
-\noindent{\it Proof\/}: It suffices to show that \label[suffices]$$\lim_{x\to c}{f(x)\over g(x)}={f'(c)\over g'(c)},\eqmark$$ since $${f'(c)\over g'(c)}=\lim_{x\to c}{f'(x)\over g'(x)}$$ by definition of continuity. Then,
+\noindent{\it Proof\/}:
 $$\eqalignno{
     \lim_{x\to c}{f(x)\over g(x)}&=\lim_{x\to c}{f(x)-0\over g(x)-0}\cr
     &=\lim_{x\to c}{f(x)-f(c)\over g(x)-g(c)}\cr
     &=\lim_{x\to c}{{f(x)-f(c)\over x-c}\over{g(x)-g(c)\over x-c}}\cr
     &=\lim_{x\to c}{\lim_{x\to c}{f(x)-f(c)\over x-c}\over\lim_{x\to c}{g(x)-g(c)\over x-c}}\cr
-    &={f'(c)\over g'(c)},
+    &={f'(c)\over g'(c)}&\square
 }$$
-proving \ref[suffices], as desired.
+
+After proving L'H\^opital's theorem as given, I continued on to prove some dependencies such as the limit algebra laws. I have not completed the entire set needed since they are not the center of the midterm and each one is a complicated $\epsilon$-$\delta$ proof, but I have given proof outlines of the multiplication law and reproduced the proof of scalar summation that I gave in Assignment 4.
+
+I intentionally did not use any of {\tt mathlib} other than {\tt data.real}, as I wanted to give completely elementary proofs from scratch of the theorems. This aspect of my proof also was quite challenging to deal with.
 
 \bye
