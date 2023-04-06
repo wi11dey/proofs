@@ -1,6 +1,13 @@
 import data.real.basic
 import data.real.sqrt
 
+/- Good work on the coding Will!  It looks like a very nice 
+topic for a midterm, and I think you made reasonable use of 
+sorrys.  I would have liked a more detailed write-up, though.
+Code 100/100
+Write-up 35/40
+-/
+
 namespace lhopitals
 
 -- NOTE: Assignment 4/5 has an incorrect ε-δ definition of a limit!
