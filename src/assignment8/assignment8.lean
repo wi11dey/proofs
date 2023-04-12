@@ -1,6 +1,14 @@
 import data.real.basic
 import data.matrix.basic
 
+
+/-
+Correctness 90/90
+Style: 10/10
+Good work Will!
+-/
+
+
 /-
 EXERCISE 1.
 
