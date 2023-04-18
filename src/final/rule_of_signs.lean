@@ -119,27 +119,6 @@ begin
   rw [list.destutter_map, list.length_map]
 end
 
--- theorem finset.sort_map {α β : Type} [linear_order α] [linear_order β] {s : finset α} {f : α ↪o β}
---    : finset.sort (≤) (finset.map f.to_embedding s) = list.map f (finset.sort (≤) s) :=
--- begin
---   ext n el,
---   by_cases hn : n < (finset.sort (≤) s).length,
---   sorry,
---   sorry
--- end
-
--- lemma sign_changes_shift {f : ℝ[X]} : sign_changes (f * polynomial.X) = sign_changes f :=
--- begin
---   unfold sign_changes,
---   congr' 3,
---   nth_rewrite_lhs 0 list.comp_map,
---   nth_rewrite_rhs 0 list.comp_map,
---   congr' 1,
---   rw [polynomial.support_mul_X, finset.sort_map, list.map_map],
---   congr' 1 with n,
---   simp only [function.comp_app, order_embedding.add_right_apply, polynomial.coeff_mul_X]
--- end
-
 lemma sign_changes_C {c : ℝ} : sign_changes (polynomial.C c) = 0 :=
 begin
   unfold sign_changes,
@@ -185,31 +164,7 @@ begin
       { use ⟨h, this f h0 heven h⟩ } },
     clear heven h0 f,
     intros p h0 heven hleading,
-    sorry
-    -- induction f using polynomial.rec_on_horner with p c hp hc ih _ hp ih,
-    -- { -- Already handled above:
-    --   contradiction },
-    -- { by_cases h : p = 0,
-    --   { simp only [h, hc.symm, polynomial.trailing_coeff_C, zero_add, polynomial.leading_coeff_C, and_self, lt_or_lt_iff_ne, ne.def, not_false_iff] },
-    --   { specialize ih h,
-    --     rw [add_comm, polynomial.leading_coeff_add_of_degree_lt],
-    --     swap,
-    --     { apply lt_of_eq_of_lt (polynomial.degree_C hc),
-    --       by_contra hdegree,
-    --       apply h,
-    --       ext n,
-    --       rw polynomial.coeff_zero,
-    --       induction n with n ih,
-    --       { exact hp },
-    --       push_neg at hdegree,
-    --       rw polynomial.degree_le_iff_coeff_zero at hdegree,
-    --       simp only [with_bot.coe_pos] at hdegree,
-    --       exact hdegree n.succ nat.succ_pos' },
-    --     sorry } },
-    -- { rw [polynomial.leading_coeff_mul_X, polynomial.trailing_coeff_mul_X],
-    --   rw ←sign_changes_shift at heven,
-    --   exact ih hp heven }
-  },
+    sorry },
   { rw [nat.odd_iff.mp hodd, nat.odd_iff.mp],
     apply card_positive_roots_of_neg_leading_trailing,
     rw mul_neg_iff,
