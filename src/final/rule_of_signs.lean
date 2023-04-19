@@ -32,12 +32,6 @@ begin
     contradiction }
 end
 
-theorem support_mul_X [semiring R] {p : R[X]}
-  : (p * polynomial.X).support = finset.map (order_embedding.add_right 1).to_embedding p.support :=
-begin
-  sorry
-end
-
 theorem trailing_coeff_C [semiring R] (a : R) : (C a).trailing_coeff = a :=
 begin
   unfold trailing_coeff,
@@ -63,11 +57,30 @@ noncomputable def positive_roots (f : ℝ[X]) : multiset ℝ :=
 
 lemma card_positive_roots_of_pos_leading_trailing {f : ℝ[X]} (h : 0 < f.leading_coeff * f.trailing_coeff) : even (positive_roots f).card :=
 begin
+  suffices : ∀ nroots = (positive_roots f).dedup.card, even (positive_roots f).card,
+  { exact this (positive_roots f).dedup.card rfl },
+  -- clear h f,
+  introv hnroots,
+  induction nroots with nroots ih generalizing f,
+  { rw [eq_comm, multiset.card_eq_zero, multiset.dedup_eq_zero] at hnroots,
+    simp only [hnroots, multiset.card_zero, even_zero] },
   rw mul_pos_iff at h,
   sorry
 end
 
-lemma card_positive_roots_of_neg_leading_trailing {f : ℝ[X]} (h : f.leading_coeff * f.trailing_coeff < 0) : odd (positive_roots f).card := sorry
+lemma card_positive_roots_of_neg_leading_trailing {f : ℝ[X]} (h : f.leading_coeff * f.trailing_coeff < 0) : odd (positive_roots f).card :=
+begin
+  suffices : ∀ nroots = (positive_roots f).dedup.card, odd (positive_roots f).card,
+  { exact this (positive_roots f).dedup.card rfl },
+  -- clear h f,
+  introv hnroots,
+  induction nroots with nroots ih generalizing f,
+  { rw mul_neg_iff at h,
+    exfalso,
+    sorry },
+  rw mul_neg_iff at h,
+  sorry
+end
 
 lemma card_positive_roots_le_of_derivative {f : ℝ[X]} : (positive_roots f).card ≤ (positive_roots f.derivative).card + 1 := sorry
 
@@ -132,6 +145,9 @@ end
 lemma sign_changes_of_derivative_le {f : ℝ[X]} : sign_changes f.derivative ≤ sign_changes f :=
 begin
   unfold sign_changes,
+  apply nat.sub_le_sub_right,
+  change (list.destutter _ (list.map (_ ∘ (λ n, f.derivative.coeff n)) _)).length ≤ _,
+  simp_rw polynomial.coeff_derivative,
   sorry
 end
 
@@ -148,8 +164,7 @@ begin
     apply card_positive_roots_of_pos_leading_trailing,
     rw mul_pos_iff,
     suffices
-      : ∀ (p : ℝ[X]),
-          p ≠ 0 →
+      : ∀ p ≠ (0 : ℝ[X]),
           even (sign_changes p) →
           0 < p.leading_coeff → 0 < p.trailing_coeff,
     { rcases trichotomous_of (<) f.leading_coeff 0 with h | h | h,
@@ -169,8 +184,7 @@ begin
     apply card_positive_roots_of_neg_leading_trailing,
     rw mul_neg_iff,
     suffices
-      : ∀ (p : ℝ[X]),
-          p ≠ 0 →
+      : ∀ p ≠ (0 : ℝ[X]),
           odd (sign_changes p) →
           0 < p.leading_coeff → p.trailing_coeff < 0,
     { rcases trichotomous_of (<) f.leading_coeff 0 with h | h | h,
@@ -193,54 +207,53 @@ begin
   { subst_vars,
     unfold sign_changes,
     simp only [positive_roots, polynomial.roots_zero, multiset.filter_zero, multiset.card_zero, list.length, polynomial.support_zero, finset.sort_empty, list.map_nil, list.destutter_nil] },
-  suffices : ∀ (n : ℕ) (p : ℝ[X]), p.degree = n → (positive_roots p).card ≤ sign_changes p,
-  { exact this f.nat_degree f (polynomial.degree_eq_nat_degree h0) },
-  intro,
-  induction n with n ih,
-  { introv hn,
-    rw [polynomial.eq_C_of_degree_eq_zero hn, sign_changes_C],
+  suffices : ∀ (n = f.nat_degree), (positive_roots f).card ≤ sign_changes f,
+  { exact this f.nat_degree rfl },
+  introv,
+  induction n with n ih generalizing f,
+  { intro hn,
+    rw [polynomial.eq_C_of_nat_degree_eq_zero hn.symm, sign_changes_C],
     unfold positive_roots,
     simp only [polynomial.roots_C, multiset.filter_zero, multiset.card_zero] },
-  introv hn,
-  suffices : (positive_roots p).card ≤ sign_changes p + 1,
+  intro hn,
+  suffices : (positive_roots f).card ≤ sign_changes f + 1,
   { apply nat.modeq.le_of_lt_add,
-    { exact decartes_rule_of_signs'' p },
-    calc (positive_roots p).card ≤ sign_changes p + 1 : this
-    ...                          < sign_changes p + 2 : lt_add_one _ },
-  specialize ih p.derivative,
-  rw polynomial.degree_eq_iff_nat_degree_eq at hn,
-  swap,
+    { exact decartes_rule_of_signs'' f },
+    calc (positive_roots f).card ≤ sign_changes f + 1 : this
+    ...                          < sign_changes f + 2 : lt_add_one _ },
+  have hf'0 : f.derivative ≠ 0,
   { by_contra h,
-    rw [←polynomial.degree_eq_bot, hn] at h,
+    have := polynomial.nat_degree_eq_zero_of_derivative_eq_zero h,
+    rw ←hn at this,
     contradiction },
-  rw polynomial.degree_derivative_eq at ih,
-  swap,
-  { rw hn,
-    exact nat.succ_pos' },
-  rw hn at ih,
-  simp only [nat.succ_sub_succ_eq_sub, tsub_zero, eq_self_iff_true, forall_true_left] at ih,
-  have := decartes_rule_of_signs'' p.derivative,
+  specialize ih f.derivative hf'0 _,
+  { rw_mod_cast [eq_comm, ←polynomial.degree_eq_iff_nat_degree_eq hf'0, polynomial.degree_derivative_eq f _, ←hn],
+    swap,
+    { rw ←hn,
+      exact nat.succ_pos'},
+    simp only [nat.succ_sub_succ_eq_sub, tsub_zero] },
+  have := decartes_rule_of_signs'' f.derivative,
   rw (nat.modeq_iff_dvd' ih) at this,
-  let s := (sign_changes p.derivative - (positive_roots p.derivative).card)/2,
-  calc (positive_roots p).card ≤ (positive_roots p.derivative).card + 1 : card_positive_roots_le_of_derivative
-  ...                          = (sign_changes p.derivative) - 2*s + 1 :
+  let s := (sign_changes f.derivative - (positive_roots f.derivative).card)/2,
+  calc (positive_roots f).card ≤ (positive_roots f.derivative).card + 1 : card_positive_roots_le_of_derivative
+  ...                          = (sign_changes f.derivative) - 2*s + 1 :
     begin
-      suffices : (positive_roots p.derivative).card = sign_changes p.derivative - 2*s,
+      suffices : (positive_roots f.derivative).card = sign_changes f.derivative - 2*s,
       { rw this },
       rw [mul_comm, nat.div_mul_cancel this, nat.sub_sub_self ih]
     end
-  ...                          ≤ (sign_changes p) - 2*s + 1 :
+  ...                          ≤ (sign_changes f) - 2*s + 1 :
     begin
       simp only [add_le_add_iff_right, tsub_le_iff_right],
       rw nat.sub_add_cancel,
       swap,
       { dsimp [s],
         rw [mul_comm, nat.div_mul_cancel this],
-        calc sign_changes p.derivative - _ ≤ sign_changes p.derivative : tsub_le_self
-        ...                                ≤ sign_changes p : sign_changes_of_derivative_le },
+        calc sign_changes f.derivative - _ ≤ sign_changes f.derivative : tsub_le_self
+        ...                                ≤ sign_changes f : sign_changes_of_derivative_le },
       exact sign_changes_of_derivative_le
     end
-  ...                          ≤ (sign_changes p) + 1 : by simp only [add_le_add_iff_right, tsub_le_self]
+  ...                          ≤ (sign_changes f) + 1 : by simp only [add_le_add_iff_right, tsub_le_self]
 end
 
 theorem decartes_rule_of_signs (f : ℝ[X])
