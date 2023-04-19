@@ -41,9 +41,9 @@ end
 theorem trailing_coeff_mul_X [ring R] [no_zero_divisors R] [nontrivial R] {p : R[X]}
   : (p * X).trailing_coeff = p.trailing_coeff :=
 begin
-  rw trailing_coeff_mul,
-  suffices : @trailing_coeff R _ X = 1,
-  { rw [this, mul_one] },
+  rw [trailing_coeff_mul],
+  nth_rewrite_rhs 0 ←(mul_one p.trailing_coeff),
+  congr,
   unfold trailing_coeff,
   simp only [nat_trailing_degree_X, coeff_X_one]
 end
@@ -57,12 +57,9 @@ noncomputable def positive_roots (f : ℝ[X]) : multiset ℝ :=
 
 lemma card_positive_roots_of_pos_leading_trailing {f : ℝ[X]} (h : 0 < f.leading_coeff * f.trailing_coeff) : even (positive_roots f).card :=
 begin
-  suffices : ∀ nroots = (positive_roots f).dedup.card, even (positive_roots f).card,
-  { exact this (positive_roots f).dedup.card rfl },
-  -- clear h f,
-  introv hnroots,
+  generalize hnroots : (positive_roots f).dedup.card = nroots,
   induction nroots with nroots ih generalizing f,
-  { rw [eq_comm, multiset.card_eq_zero, multiset.dedup_eq_zero] at hnroots,
+  { rw [multiset.card_eq_zero, multiset.dedup_eq_zero] at hnroots,
     simp only [hnroots, multiset.card_zero, even_zero] },
   rw mul_pos_iff at h,
   sorry
@@ -70,10 +67,7 @@ end
 
 lemma card_positive_roots_of_neg_leading_trailing {f : ℝ[X]} (h : f.leading_coeff * f.trailing_coeff < 0) : odd (positive_roots f).card :=
 begin
-  suffices : ∀ nroots = (positive_roots f).dedup.card, odd (positive_roots f).card,
-  { exact this (positive_roots f).dedup.card rfl },
-  -- clear h f,
-  introv hnroots,
+  generalize hnroots : (positive_roots f).dedup.card = nroots,
   induction nroots with nroots ih generalizing f,
   { rw mul_neg_iff at h,
     exfalso,
@@ -179,7 +173,15 @@ begin
       { use ⟨h, this f h0 heven h⟩ } },
     clear heven h0 f,
     intros p h0 heven hleading,
-    sorry },
+    generalize hsupp : p.support = supp,
+    have : supp.nonempty := by rwa [←hsupp, polynomial.nonempty_support_iff],
+    induction this using finset.nonempty.cons_induction with supp a s h hs ih,
+    { unfold polynomial.trailing_coeff polynomial.nat_trailing_degree polynomial.trailing_degree,
+      unfold polynomial.leading_coeff polynomial.nat_degree polynomial.degree at hleading,
+      rw hsupp at *,
+      simp only [finset.min_singleton, option.get_or_else_coe, finset.max_singleton, with_bot.unbot'_coe] at *,
+      exact hleading },
+    { sorry } },
   { rw [nat.odd_iff.mp hodd, nat.odd_iff.mp],
     apply card_positive_roots_of_neg_leading_trailing,
     rw mul_neg_iff,
@@ -207,15 +209,11 @@ begin
   { subst_vars,
     unfold sign_changes,
     simp only [positive_roots, polynomial.roots_zero, multiset.filter_zero, multiset.card_zero, list.length, polynomial.support_zero, finset.sort_empty, list.map_nil, list.destutter_nil] },
-  suffices : ∀ (n = f.nat_degree), (positive_roots f).card ≤ sign_changes f,
-  { exact this f.nat_degree rfl },
-  introv,
+  generalize hn : f.nat_degree = n,
   induction n with n ih generalizing f,
-  { intro hn,
-    rw [polynomial.eq_C_of_nat_degree_eq_zero hn.symm, sign_changes_C],
+  { rw [polynomial.eq_C_of_nat_degree_eq_zero hn, sign_changes_C],
     unfold positive_roots,
     simp only [polynomial.roots_C, multiset.filter_zero, multiset.card_zero] },
-  intro hn,
   suffices : (positive_roots f).card ≤ sign_changes f + 1,
   { apply nat.modeq.le_of_lt_add,
     { exact decartes_rule_of_signs'' f },
@@ -224,13 +222,13 @@ begin
   have hf'0 : f.derivative ≠ 0,
   { by_contra h,
     have := polynomial.nat_degree_eq_zero_of_derivative_eq_zero h,
-    rw ←hn at this,
+    rw hn at this,
     contradiction },
   specialize ih f.derivative hf'0 _,
-  { rw_mod_cast [eq_comm, ←polynomial.degree_eq_iff_nat_degree_eq hf'0, polynomial.degree_derivative_eq f _, ←hn],
+  { rw_mod_cast [←polynomial.degree_eq_iff_nat_degree_eq hf'0, polynomial.degree_derivative_eq f _, hn],
     swap,
-    { rw ←hn,
-      exact nat.succ_pos'},
+    { rw hn,
+      exact nat.succ_pos' },
     simp only [nat.succ_sub_succ_eq_sub, tsub_zero] },
   have := decartes_rule_of_signs'' f.derivative,
   rw (nat.modeq_iff_dvd' ih) at this,
@@ -238,8 +236,7 @@ begin
   calc (positive_roots f).card ≤ (positive_roots f.derivative).card + 1 : card_positive_roots_le_of_derivative
   ...                          = (sign_changes f.derivative) - 2*s + 1 :
     begin
-      suffices : (positive_roots f.derivative).card = sign_changes f.derivative - 2*s,
-      { rw this },
+      congr' 1,
       rw [mul_comm, nat.div_mul_cancel this, nat.sub_sub_self ih]
     end
   ...                          ≤ (sign_changes f) - 2*s + 1 :
