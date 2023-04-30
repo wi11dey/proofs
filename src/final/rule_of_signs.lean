@@ -12,6 +12,8 @@ import data.polynomial.degree.trailing_degree
 import data.polynomial.inductions
 import set_theory.cardinal.basic
 
+noncomputable theory
+
 open_locale polynomial
 
 namespace polynomial
@@ -60,12 +62,11 @@ begin
   rw polynomial.erase_lead_coeff_of_ne,
   { congr' 1,
     unfold polynomial.nat_trailing_degree polynomial.trailing_degree,
-    
     sorry },
   sorry
 end
 
-noncomputable def div_all_X [ring R] (p : R[X]) := p /ₘ polynomial.X^p.nat_trailing_degree
+def div_all_X [ring R] (p : R[X]) := p /ₘ polynomial.X^p.nat_trailing_degree
 
 theorem coeff_div_all_X [ring R] {p : R[X]} (n : ℕ) : p.div_all_X.coeff n = p.coeff (n + p.nat_trailing_degree) := sorry
 
@@ -107,7 +108,7 @@ theorem div_by_monic_mul_pow_root_multiplicity_roots [comm_ring R] [is_domain R]
 
 end polynomial
 
-noncomputable def positive_roots (f : ℝ[X]) : multiset ℝ :=
+def positive_roots (f : ℝ[X]) : multiset ℝ :=
   multiset.filter (λ a, 0 < a) (polynomial.roots f)
 
 lemma positive_roots_neg {f : ℝ[X]} : positive_roots (-f) = positive_roots f :=
@@ -134,26 +135,8 @@ begin
   split_ifs,
   swap,
   { refl },
-  
   sorry
 end
-
--- lemma multiset.filter_dedup {α : Type} [decidable_eq α] {s : multiset α} {p : α → Prop} [decidable_pred p]
---   : multiset.filter p s.dedup = (multiset.filter p s).dedup :=
--- begin
---   sorry
--- end
-
--- lemma multiset.to_finset_erase {α : Type} [decidable_eq α] {s : multiset α} {a : α} : s.to_finset.erase a = (multiset.filter (λ (b : α), b ≠ a) s).to_finset :=
--- begin
---   unfold multiset.to_finset finset.erase,
---   conv_lhs
---   { change {finset . val := s.dedup.erase a, nodup := _},
---     congr,
---     rw multiset.nodup.erase_eq_filter _ (multiset.nodup_dedup s) },
---   congr,
---   rw multiset.filter_dedup
--- end
 
 theorem list.even_induction {α : Type} {P : list α → Prop}
   (hnil : P list.nil)
@@ -218,30 +201,6 @@ begin
   sorry,
   sorry,
   sorry,
-  -- generalize hroots : (positive_roots f).to_finset = roots,
-  -- induction roots using finset.induction_on with root roots hroot ih generalizing f,
-  -- { rw multiset.to_finset_eq_empty at hroots,
-  --   simp only [hroots, multiset.card_zero, even_zero] },
-  -- let g := f /ₘ ((polynomial.X - polynomial.C root) ^ polynomial.root_multiplicity root f),
-  -- specialize @ih g _ _ _ _,
-  -- { dsimp [g],
-  --   rw polynomial.leading_coeff_div_by_monic_of_monic,
-  --   { exact hleading },
-  --   { apply polynomial.monic.pow, 
-  --     apply polynomial.monic_X_sub_C },
-  --   { simp only [polynomial.degree_pow, polynomial.degree_X_sub_C, nat.smul_one_eq_coe],
-  --     have fne0 : f ≠ 0,
-  --     { rw ←polynomial.leading_coeff_ne_zero,
-  --       linarith },
-  --     rw_mod_cast [polynomial.degree_eq_nat_degree fne0, polynomial.root_multiplicity_le_iff fne0],
-  --     apply polynomial.not_dvd_of_nat_degree_lt fne0,
-  --     simp only [polynomial.nat_degree_pow, polynomial.nat_degree_X_sub_C, mul_one, lt_add_iff_pos_right, nat.lt_one_iff] } },
-  -- { sorry },
-  -- { sorry },
-  -- { unfold positive_roots,
-  --   rw [polynomial.div_by_monic_mul_pow_root_multiplicity_roots, ←(finset.erase_insert hroot), ←hroots],
-  --   unfold positive_roots,
-  --   simp_rw [multiset.filter_filter, and_comm, ←multiset.filter_filter, ←multiset.to_finset_erase] },
   sorry
 end
 
@@ -281,7 +240,7 @@ end
 
 lemma card_positive_roots_le_of_derivative {f : ℝ[X]} : (positive_roots f).card ≤ (positive_roots f.derivative).card + 1 := sorry
 
-noncomputable def sign_changes (f : ℝ[X]) : ℕ :=
+def sign_changes (f : ℝ[X]) : ℕ :=
   (list.destutter (≠) 
    $ list.map (real.sign ∘ f.coeff)
    $ finset.sort (≤) f.support).length - 1
